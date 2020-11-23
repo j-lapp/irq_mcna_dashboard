@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1577603279887.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2506020357",
+    "id" : "BE110A73",
+    "lastKnownWriteTime" : 1577446229,
+    "last_content_update" : 1577446229,
+    "path" : "C:/Users/Jarod Lapp/Desktop/R scripts/sf_practice/sf_practice/shiny_app/ui.R",
+    "project_path" : "shiny_app/ui.R",
+    "properties" : {
+        "cursorPosition" : "11,26",
+        "scrollLine" : "0",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

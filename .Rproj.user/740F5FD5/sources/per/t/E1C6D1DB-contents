@@ -1,0 +1,275 @@
+library(sf)
+library(purrr)
+library(readxl)
+library(RColorBrewer)
+library(mapview)
+library(tidyverse)
+library(leaflet)
+library(shiny)
+library(geojsonio)
+library(viridis)
+library(gapminder)
+library(stringr)
+library(widgetframe)
+
+library(raster)
+
+options(digits = 3)
+set.seed(1234)
+theme_set(theme_minimal())
+
+############### COLOURZ !!!!!!!!!!!
+# reach colours
+reach_colours <- c(
+  `red`       = "#EE5859",
+  `pink`      = "#FEF2F2",
+  `tan`       = "#D2CBB8",
+  `lt_grey`   = "#D1D3D4",
+  `grey`      = "#58585A",
+  `orange`    = "#F69E61",
+  `green`     = "#A5C9A1")
+
+reach_cols <- function(...) {
+  cols <- c(...)
+  
+  if (is.null(cols))
+    return (reach_colours)
+  
+  reach_colours[cols]
+}
+
+##################### SAMPLE FRAME OR LIST OF HTR DIST #################
+
+# input sample frame
+htr_dist_list<-read.csv("csv_data/HTR_round1_dist_list.csv") 
+
+# load htr data
+htr_rank<-read.csv("csv_data/HTR_Districts_Final.csv") %>% 
+  mutate(district_reporting=district)
+
+
+################ Read GEOJSON and convert to SF Objects
+# international boundaries ##########################
+int_bound<-st_read("spatial_data/int_boundaries.geojson") %>% 
+  mutate(country=str_to_title(COUNTRY_NA))
+
+#################
+# province centres 
+prov_centre<-st_read("spatial_data/prov_dist_centres_v2.geojson") %>% 
+  filter(Unit_Type=="Provincial_Center"|Unit_Type=="Capital") %>% 
+  mutate(province_center = str_to_title(Province_Center))
+
+# dist centre
+dist_centre<-st_read("spatial_data/prov_dist_centres_v2.geojson") %>% 
+  filter(Unit_Type=="District_Center"&Province_Name=="Kunar") %>% 
+  mutate(dist_center = str_to_title(District_Name))
+
+############### PROVINCES
+# provinces
+prov_dari<-read_excel("csv_data/prov_dari.xlsx")
+
+afg_prov<-st_read("spatial_data/afg_provinces_v2.geojson") 
+
+afg_prov<-left_join(afg_prov,prov_dari,by="Prvnce_Eng")
+
+afg_prov<-afg_prov %>% 
+  mutate(province = str_to_title(Prvnce_Eng),
+         province_dari= str_to_title(province_dari))
+
+#select one prov
+
+
+select_prov<-afg_prov %>% 
+  filter(province=="Kunar")
+
+not_select_prov<-afg_prov %>% 
+  filter(province!="Kunar")
+
+# province borders
+afg_prov_lines<-st_read("spatial_data/afg_provinces_v2_lines.geojson")
+
+################# PROVINCE LABELS ###########
+
+#province centroids
+prov_labels<-st_read("spatial_data/prov_centroid.geojson") %>% 
+  mutate(province = str_to_title(Prvnce_Eng),
+         province_dari=str_to_title(Prvnce_Dri))
+
+select_prov_labels<-prov_labels %>%
+  filter(province=="Kunar")
+
+# province label format
+prov_labels_grey <- sprintf(
+  '<strong><span style="font-size: 11px; color: #58585A">%s</span></strong>',
+  prov_labels$province)%>% 
+  lapply(htmltools::HTML)
+
+prov_labels_grey_dari <- sprintf(
+  '<strong><span style="font-size: 20px; color: #58585A">%s</span></strong>',
+  prov_labels$province_dari)%>% 
+  lapply(htmltools::HTML)
+
+
+prov_labels_halo <- sprintf(
+  '<strong><span style="font-size: 11px; color: #FFFFFF">%s</span></strong>',
+  prov_labels$province)%>% 
+  lapply(htmltools::HTML)
+
+prov_labels_halo_dari <- sprintf(
+  '<strong><span style="font-size: 16px; color: #FFFFFF">%s</span></strong>',
+  prov_labels$province_dari)%>% 
+  lapply(htmltools::HTML)
+
+select_prov_labels_halo <- sprintf(
+  '<strong><span style="font-size: 22px; color: #58585A">%s</span></strong>',
+  select_prov_labels$province)%>% 
+  lapply(htmltools::HTML)
+
+select_prov_labels_halo_dari <- sprintf(
+  '<strong><span style="font-size: 28px; color: #58585A">%s</span></strong>',
+  select_prov_labels$province_dari)%>% 
+  lapply(htmltools::HTML)
+
+###################  DISTRICTS #############
+
+dist_dari<-read_excel("csv_data/dist_dari.xlsx")
+
+# distr
+afg_dist<-st_read("spatial_data/afg_districts_v2.geojson")
+
+afg_dist<-left_join(afg_dist,prov_dari,by="Prvnce_Eng")
+afg_dist<-left_join(afg_dist,dist_dari,by="dist_join_dist_name")
+
+afg_dist<-afg_dist %>% 
+  mutate(district=dist_join_dist_name,
+         province=Prvnce_Eng)
+
+# province districts select
+select_dist<-afg_dist %>% 
+  filter(province=="Kunar")
+
+not_select_dist<-afg_dist %>% 
+  filter(province!="Kunar")
+
+################### HTR DISTRICTS #############
+# htr districts join
+
+htr_dist<-left_join(afg_dist,htr_dist_list,by="district",na.rm=T)
+
+# rank join
+htr_dist<-left_join(htr_dist,htr_rank,by="district_reporting",na.rm=T) 
+
+htr_dist<-htr_dist %>% 
+  filter(htr==1) %>% 
+  mutate(htr_dist = str_to_title(Dstrct_Eng),
+         htr_prov= str_to_title(Prvnce_Eng))
+
+# filter for selected province
+select_htr_dist<-htr_dist %>% 
+  filter(Prvnce_Eng=="Kunar")
+
+######### district centroids for district labels ###############
+dist_labels<-st_read("spatial_data/dist_label_points.geojson") %>%
+  mutate(district = str_to_title(Dstrct_Eng),
+         district_reporting=dist_join_dist_name,
+         province=str_to_title(Prvnce_Eng))%>% 
+  filter(province!="Kunar")
+
+htr_dist_labels<-st_read("spatial_data/dist_label_points.geojson") %>%
+  mutate(htr_prov = str_to_title(Prvnce_Eng),
+         htr_dist = str_to_title(Dstrct_Eng),
+         district=dist_join_dist_name) %>% 
+  filter(htr_prov=="Kunar")
+
+htr_dist_labels<-htr_dist_labels %>% 
+  left_join(htr_dist_list,by="district",na.rm=T) %>% 
+  filter(htr==1)
+
+htr_dist_labels<-left_join(htr_dist_labels,dist_dari,by="dist_join_dist_name")
+
+
+# district label format
+
+htr_dist_labels_select <- sprintf(
+  '<strong><span style="font-size: 11px; color: #EE5859">%s</span></strong>',
+  htr_dist_labels$htr_dist)%>% 
+  lapply(htmltools::HTML)
+
+htr_dist_labels_select_dari <- sprintf(
+  '<strong><span style="font-size: 15px; color: #EE5859">%s</span></strong>',
+  htr_dist_labels$dist_dari)%>% 
+  lapply(htmltools::HTML)
+
+####################### TOOLTIPZ ##########################################################################################
+
+################### Districts ###################################
+# HTR district tooltip
+htr_dist_tooltip <- sprintf(
+  '<strong><span style="font-size: 14px; color: #EE5859;font-family:Arial;">%s</span><br><span style="font-size: 10px; color: #58585A;"> %s Province</strong></span><br><span style="font-size: 9px; color: #58585A;"><strong>Overall HTR Rank: %g</strong></span>',
+  htr_dist$htr_dist,htr_dist$htr_prov, htr_dist$Rank)%>% 
+  lapply(htmltools::HTML)
+
+# HTR districts in selected Prov
+htr_dist_tooltip_select <- sprintf(
+  '<strong><span style="font-size: 18px; color: #EE5859;font-family:Arial;">%s</span><br><span style="font-size: 14px; color: #58585A;"> %s Province</strong></span><br><span style="font-size: 10px; color: #58585A;"><strong>Overall HTR Rank: %g</strong></span>',
+  select_htr_dist$htr_dist,select_htr_dist$htr_prov, select_htr_dist$Rank)%>% 
+  lapply(htmltools::HTML)
+
+# dari HTR dist
+htr_dist_dari_tooltip <- sprintf(
+  '<strong><span style="font-size: 22px; color: #EE5859;font-family:Arial;">%s </span><br><span style="font-size: 18px; color: #58585A;"> %s </strong></span><br><span style="font-size: 10px; color: #58585A;"><strong>Overall HTR Rank: %g</strong></span>',
+  htr_dist$dist_dari,htr_dist$province_dari, htr_dist$Rank)%>% 
+  lapply(htmltools::HTML)
+
+# dari in selected Prov
+htr_dist_tooltip_select_dari <- sprintf(
+  '<strong><span style="font-size: 18px; color: #EE5859;font-family:Arial;">%s</span><br><span style="font-size: 14px; color: #58585A;"> %s </strong></span><br><span style="font-size: 10px; color: #58585A;"><strong>Overall HTR Rank: %g</strong></span>',
+  select_htr_dist$dist_dari,select_htr_dist$province_dari, select_htr_dist$Rank)%>% 
+  lapply(htmltools::HTML)
+
+############################ DISTRICT AND PROVINCE CENTRE TOOLTIPZ ##########################
+# Province Centres tooltip
+prov_cent_tooltip <- sprintf(
+  '<strong><span style="font-size: 11px; color: #EE5859;">%s</span></strong><br><strong><span style="font-size: 9px; color: #58585A;">Provincial Capital</span><br><span style="font-size: 8px; color: #58585A;"> %s Province</strong></span>',
+  prov_centre$province_center,prov_centre$Province_Name)%>% 
+  lapply(htmltools::HTML)
+
+# District Centres tooltip
+dist_cent_tooltip <- sprintf(
+  '<strong><span style="font-size: 13px; color: #58585A;">%s</span></strong><br><strong><span style="font-size: 11px; color: #EE5859;">District Centre</span>',
+  dist_centre$District_Name)%>% 
+  lapply(htmltools::HTML)
+
+############### ROADS LAKES RIVERS ETC for province level maps
+
+# settlements
+select_villages<-st_read("spatial_data/afg_settlements.geojson") %>% 
+  st_intersection(select_dist)
+
+# roads
+select_roads<-st_read("spatial_data/AFG_roads_ACTED.geojson") %>% 
+  filter(!is.na(NAME1_)) %>% 
+  st_intersection(select_dist)
+
+# rivers
+select_rivers<-st_read("spatial_data/afg_rivers.geojson") %>% 
+  st_intersection(select_dist)
+
+# lakes
+
+select_lakes<-st_read("spatial_data/afg_lakes.geojson") %>% 
+  st_intersection(select_dist)
+
+# hillshade
+hillshade <- raster("spatial_data/AFG_Hillshade/AFG_HILLSHADE.TIF")
+
+hillshade_crop <- crop(hillshade, select_dist)
+select_hillshade <- mask(hillshade_crop, select_dist)
+
+hillshade_pal <- colorNumeric(c("#58585A","#D1D3D4", "#FFFFFF"), values(select_hillshade),na.color = "transparent")
+
+
+################## bounding box selected province
+bbox <- st_bbox(select_prov) %>% 
+  as.vector()
+

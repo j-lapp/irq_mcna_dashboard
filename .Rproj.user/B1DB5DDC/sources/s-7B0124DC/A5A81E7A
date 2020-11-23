@@ -1,0 +1,29 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1606085176401.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "A5A81E7A",
+    "lastKnownWriteTime" : 7308604914264011873,
+    "last_content_update" : 1606085176401,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "9AF58B1E",
+        "caption" : "returnee_lookup",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=returnee_lookup&cache_key=9AF58B1E",
+        "displayedObservations" : 196,
+        "environment" : "",
+        "object" : "returnee_lookup",
+        "preview" : 0,
+        "totalObservations" : 196,
+        "variables" : 19
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1584604692467.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2506020357",
+    "id" : "A86584BC",
+    "lastKnownWriteTime" : 1577451630,
+    "last_content_update" : 1577451630,
+    "path" : "C:/Users/REACH IRAQ GIS/Desktop/R/R scripts/htr_dashboard/htr_dashboard/shiny_app/ui.R",
+    "project_path" : "shiny_app/ui.R",
+    "properties" : {
+        "cursorPosition" : "30,0",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

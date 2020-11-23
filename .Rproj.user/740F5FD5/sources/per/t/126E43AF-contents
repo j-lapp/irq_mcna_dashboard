@@ -1,0 +1,570 @@
+  server <- function(input, output,session) {
+    
+    output$map <- renderLeaflet({
+  
+  
+      afg_level<-leaflet(data=int_bound,option=leafletOptions(zoomControl=FALSE,doubleClickZoom= FALSE,zoomSnap = 0.01, zoomDelta = 0.01)) %>%
+  
+        addPolygons(
+          color = "#58585A",
+          fillColor = "#FFFFFF",
+          weight = 1,
+          smoothFactor = 0.5,
+          opacity = 0.1,
+          fillOpacity = 0.4,
+          options = list(zIndex = 99)
+        ) %>%
+        addPolygons(data=afg_dist,
+                    color = "#58585A",
+                    fillColor = "#D1D3D4",
+                    weight = 0.1,
+                    smoothFactor = 0.5,
+                    opacity = 1.0,
+                    fillOpacity = 0.8,
+                    options = list(zIndex = 100)
+        ) %>%
+        addPolygons(data=htr_dist,
+                    color = "white",
+                    fillColor = "#EE5859",
+                    weight = 0.5,
+                    smoothFactor = 0.5,
+                    opacity = 1.0,
+                    fillOpacity = 1,
+                    label = htr_dist_tooltip,
+                    layerId = htr_dist$htr_dist,
+                    group="click.list",
+                    options = list(zIndex = 200),
+                    highlightOptions = highlightOptions(fillColor="#F5A6A6",
+                                                        color="white",
+                                                        weight = 1.4,
+                                                        bringToFront = F
+                    ),
+                    labelOptions = labelOptions(
+                      style = list("font-weight" = "normal",
+                                   "padding" = "3px 8px",
+                                   "font-family" = "Arial",
+                                   "border-color" = "#D1D3D4"
+                      ),
+                      offset = c(8,0),
+                      direction = "right",
+                      opacity=0.9)) %>%
+        #dari
+        # addPolygons(data=htr_dist,
+        #             color = "white",
+        #             fillColor = "#EE5859",
+        #             weight = 0.5,
+        #             smoothFactor = 0.5,
+        #             opacity = 1.0,
+        #             fillOpacity = 1,
+        #             label = htr_dist_dari_tooltip,
+        #             group="Dari",
+        #             options = list(zIndex = 100),
+        #             highlightOptions = highlightOptions(fillColor="#F5A6A6",
+        #                                                 color="white",
+        #                                                 weight = 1.4,
+        #                                                 bringToFront = F),
+        #             labelOptions = labelOptions(
+        #               style = list("font-weight" = "normal", padding = "3px 8px"),
+        #               textsize = "15px",
+        #               color="#58585A",
+        #               direction = "auto",
+        #               opacity=0.9)) %>%
+  
+        addPolylines(data=afg_prov_lines,color = "#58585A",
+                     weight = 1.1,
+                     opacity = 1.0,
+                     group="Dari",
+                     options = list(zIndex = 300))%>%
+        addPolylines(data=afg_prov_lines,color = "#58585A",
+                     weight = 1.1,
+                     opacity = 1.0,
+                     group="English",
+                     options = list(zIndex = 300))%>%
+        addCircleMarkers(data=prov_labels,
+                         color = "#58585A",
+                         radius=0,
+                         weight=0.1,
+                         opacity = 1.0,
+                         options = list(zIndex = 400)) %>%
+        addLabelOnlyMarkers(data=prov_labels,
+                            label = prov_labels_halo,
+                            group = "English",
+                            labelOptions = labelOptions(noHide = T,
+                                                        direction = 'center',
+                                                        textOnly = T,
+                                                        style = list(
+                                                          "padding" = "3px 8px",
+                                                          "font-family" = "Arial",
+                                                          "text-shadow"="2px 2px 5px #58585A"
+                                                        ))) %>%
+        # dari
+        addLabelOnlyMarkers(data=prov_labels,
+                            label = prov_labels_halo_dari,
+                            group = "Dari",
+                            labelOptions = labelOptions(noHide = T,
+                                                        direction = 'center',
+                                                        textOnly = T,
+                                                        style = list(
+                                                          "padding" = "3px 8px",
+                                                          "font-family" = "Arial",
+                                                          "text-shadow"="2px 2px 5px #58585A"
+                                                        ))) %>%
+        addCircleMarkers(data=prov_centre,
+                         color = "#58585A",
+                         radius=3,
+                         weight=0.1,
+                         opacity = 1.0,
+                         fillOpacity=0.9,
+                         group="Dari",
+                         label = prov_cent_tooltip,
+                         labelOptions = labelOptions(
+                           style = list("font-weight" = "normal",
+                                        "padding" = "3px 8px",
+                                        "font-family" = "Arial",
+                                        "border-color" = "#D1D3D4"
+                           ),
+                           direction = "auto",
+                           opacity=0.9),
+                         options = list(zIndex = 350)) %>%
+        addCircleMarkers(data=prov_centre,
+                         color = "#58585A",
+                         radius=3,
+                         weight=0.1,
+                         opacity = 1.0,
+                         fillOpacity=0.9,
+                         group="English",
+                         label = prov_cent_tooltip,
+                         labelOptions = labelOptions(
+                           style = list("font-weight" = "normal",
+                                        "padding" = "3px 8px",
+                                        "font-family" = "Arial",
+                                        "border-color" = "#D1D3D4"
+                           ),
+                           direction = "auto",
+                           opacity=0.9),
+                         options = list(zIndex = 350)) %>%
+        addLegend("bottomleft", 
+                  colors = "#EE5859", 
+                  labels ="Hard to Reach district<br>    ولسوالی های صعب العبور",
+                  data = htr_dist,
+                  group = "English", 
+                  opacity = 1) %>%
+        addLayersControl(
+          baseGroups = c("English","Dari"),
+          options = layersControlOptions(collapsed = F)
+        ) %>%
+  
+        setView(lng=69.0578, lat=34.0284, zoom = 6.55)
+    # #     htmlwidgets::onRender("
+    # #     function(el, x) {
+    # #                           console.log(this);
+    # #                           var myMap = this;
+    # #                           var imageUrl = 'https://www.reach-initiative.org/wp-content/uploads/2019/11/Unheard3-1-370x210.png';
+    # #                           var imageBounds = [[34.712216, 70.4578], [35.773941, 68.4578]];
+    # #                           L.imageOverlay(imageUrl, imageBounds).addTo(myMap);
+    # #                           bringToFront(imageUrl);
+    # # }
+    # #                           ")
+    # #   
+    # # 
+    # 
+    })
+    # # reactiveVal for the map object, and corresponding output object.
+    # myMap_reval <- reactiveVal(map())
+    # output$myMap <- renderLeaflet({
+    #   myMap_reval()
+    # }) 
+    # 
+    # # To hold the selected map region id.
+    # click.list <- reactiveValues( ids = vector() )
+    # 
+    # observeEvent( input$myMap_shape_click, ignoreNULL = T,ignoreInit = T, {
+    #   
+    #   # If already selected, first remove previous selection
+    #   if(length(click.list)>0)
+    #   {
+    #     remove_id = click.list$ids
+    #     lines.of.interest <- htr_dist[ which( htr_dist$htr_dist %in% remove_id) , ]
+    #     leafletProxy( mapId = "myMap" ) %>%
+    #       addPolylines( data = lines.of.interest
+    #                     , layerId = lines.of.interest@data$id
+    #                     , color = "#000000"
+    #                     , weight = 2
+    #                     , opacity = 0.2)
+    #   }
+    #   
+    #   # add current selection
+    #   click <- input$myMap_shape_click
+    #   click.list$ids <- click$id  # we only store the last click now!
+    #   lines.of.interest <- htr_dist[ which( htr_dist$htr_dist %in% click.list$ids ) , ]
+    #   print(click)
+    #   if( is.null( click$id ) ){
+    #     req( click$id )
+    #   } else if( !click$id %in% lines.of.interest@data$id ){
+    #     leaflet::leafletProxy( mapId = "myMap" ) %>%
+    #       addPolylines( data = lines.of.interest
+    #                     , layerId = lines.of.interest@data$id
+    #                     , color = "#6cb5bc"
+    #                     , weight = 5
+    #                     , opacity = 1
+    #       ) 
+    #   }
+    #   
+    # }) # end of shiny::observeEvent({})
+    
+    # # oberver for the clearHighlight button.
+    # shiny::observeEvent( input$clearHighlight, {
+    #   click.list$ids <- NULL
+    #   myMap_reval(map()) # reset map.
+    # }) 
+    
+  } 
+    
+  
+    runApp(shinyApp(ui, server),launch.browser = TRUE)
+    
+  
+   
+  #   # create a reactive value that will store the click position
+  # clicked_state<- eventReactive(input$map_shape_click,{
+  #     return(input$map_shape_click$id)
+  #   })
+  #    
+  #    
+  # observeEvent(input$map_shape_click,{
+  #   clicked_state$clickedpolygon <- input$map_shape_click
+  #    })
+    
+  
+    server <- function(input, output) {
+      
+      output$map <- renderLeaflet({
+        
+    prov_level<-  leaflet(data=not_select_dist,option=leafletOptions(zoomControl=FALSE,doubleClickZoom= FALSE)) %>%
+
+      addPolygons(color = "#58585A",
+                  fillColor = "#D1D3D4",
+                  weight = 0.2,
+                  smoothFactor = 0.5,
+                  opacity = 0.6,
+                  fillOpacity = 0.8,
+                  options = list(zIndex = 100)
+      ) %>%
+      addPolygons(data=select_dist,
+                  color = "#58585A",
+                  fillColor = "#F2F2F2",
+                  weight = 0.7,
+                  smoothFactor = 0.5,
+                  opacity = 0.8,
+                  fillOpacity = 0.8,
+                  options = list(zIndex = 100)
+      ) %>%
+      addPolygons(data=select_htr_dist,
+                  color = "#EE5859",
+                  fillColor = "#F9C6C7",
+                  weight = 1.2,
+                  smoothFactor = 0.5,
+                  opacity = 1,
+                  fillOpacity = 0.8,
+                  label = htr_dist_tooltip_select,
+                  group="English",
+                  options = list(zIndex = 300),
+                  highlightOptions = highlightOptions(fillColor = "white",
+                                                      fillOpacity = 0.4,
+                                                      color="#A73E3E",
+                                                      weight = 3,
+                                                      bringToFront = F),
+                  labelOptions = labelOptions(
+                    style = list("font-weight" = "normal",
+                                 "padding" = "3px 8px",
+                                 "font-family" = "Arial",
+                                 "border-color" = "#D1D3D4"
+                    ),
+                    offset = c(8,0),
+                    direction = "right",
+                    opacity=0.9)) %>%
+      addPolygons(data=select_htr_dist,
+                  color = "#EE5859",
+                  fillColor = "#F9C6C7",
+                  weight = 1.2,
+                  smoothFactor = 0.5,
+                  opacity = 1,
+                  fillOpacity = 0.8,
+                  label = htr_dist_tooltip_select_dari,
+                  group="Dari",
+                  options = list(zIndex = 300),
+                  highlightOptions = highlightOptions(fillColor = "white",
+                                                      fillOpacity = 0.4,
+                                                      color="#A73E3E",
+                                                      weight = 3,
+                                                      bringToFront = F),
+                  labelOptions = labelOptions(
+                    style = list("font-weight" = "normal",
+                                 "padding" = "3px 8px",
+                                 "font-family" = "Arial",
+                                 "border-color" = "#D1D3D4"
+                    ),
+                    offset = c(8,0),
+                    direction = "right",
+                    opacity=0.9)) %>%
+
+      addPolylines(data=afg_prov_lines,
+                   color = "#58585A",
+                   weight = 2,
+                   opacity = 0.1,
+                   options = list(zIndex = 150))%>%
+
+      ##### add province details
+      addPolylines(data=select_roads,
+                   color = "#7B4F30",
+                   group="English",
+                   # dashArray= "2,2",
+                   weight = 0.8,
+                   opacity = 0.7,
+                   options = list(zIndex = 303))%>%
+      addPolylines(data=select_roads,
+                   color = "#7B4F30",
+                   group="Dari",
+                   # dashArray= "1,2",
+                   weight = 0.8,
+                   opacity = 0.7,
+                   options = list(zIndex = 303))%>%
+      addPolylines(data=select_rivers,
+                   color = "#0067A9",
+                   group ="English",
+                   weight = 0.8,
+                   opacity = 0.3,
+                   options = list(zIndex = 302))%>%
+      addPolylines(data=select_rivers,
+                   color = "#0067A9",
+                   group = "Dari",
+                   weight = 0.8,
+                   opacity = 0.3,
+                   options = list(zIndex = 302))%>%
+      addPolygons(data=select_lakes,
+                  color = "#58585A",
+                  fillColor = "#0067A9",
+                  group = "English",
+                  weight = 0.7,
+                  smoothFactor = 0.5,
+                  opacity = 0,
+                  fillOpacity = 0.3,
+                  options = list(zIndex = 302)
+      ) %>%
+      addPolygons(data=select_lakes,
+                  color = "#58585A",
+                  fillColor = "#0067A9",
+                  group = "Dari",
+                  weight = 0.7,
+                  smoothFactor = 0.5,
+                  opacity = 0,
+                  fillOpacity = 0.3,
+                  options = list(zIndex = 302)
+      ) %>%
+      #### add markers and labels
+      addCircleMarkers(data=prov_labels,
+                       color = "#58585A",
+                       group="English",
+                       radius=0,
+                       weight=0.1,
+                       opacity = 1.0,
+                       options = list(zIndex = 400)) %>%
+      # addLabelOnlyMarkers(data=prov_labels,
+      #                     label = prov_labels_halo,
+      #                     labelOptions = labelOptions(noHide = T,
+      #                                                 direction = 'center',
+      #                                                 textOnly = T,
+      #                                                 style = list(
+      #                                                   "padding" = "3px 8px",
+      #                                                   "font-family" = "Arial"
+      #                                                   # "text-shadow"="2px 2px 5px #58585A"
+      #                                                 )))  %>%
+      # addCircleMarkers(data=prov_labels,
+      #                  color = "#58585A",
+      #                  group = "Dari",
+      #                  radius=0,
+      #                  weight=0.1,
+      #                  opacity = 1.0,
+      #                  options = list(zIndex = 400)) %>%
+      # addLabelOnlyMarkers(data=prov_labels,
+      #                     label = prov_labels_halo_dari,
+      #                     labelOptions = labelOptions(noHide = T,
+      #                                                 direction = 'center',
+      #                                                 textOnly = T,
+      #                                                 style = list(
+      #                                                   "padding" = "3px 8px",
+      #                                                   "font-family" = "Arial"
+      #                                                   # "text-shadow"="2px 2px 5px #58585A"
+      #                                                 )))  %>%
+
+      addLabelOnlyMarkers(data=select_prov_labels,
+                          label = select_prov_labels_halo,
+                          group = "English",
+                          labelOptions = labelOptions(noHide = T,
+                                                      direction = 'center',
+                                                      textOnly = T,
+                                                      style = list(
+                                                        "font-family" = "Arial",
+                                                        "text-shadow"="2px 2px 5px #FFFFFF,-2px 2px 5px #FFFFFF,2px -2px 5px #FFFFFF,-2px -2px 5px #FFFFFF"
+
+
+                                                      ))) %>%
+      addLabelOnlyMarkers(data=select_prov_labels,
+                          label = select_prov_labels_halo_dari,
+                          group= "Dari",
+                          labelOptions = labelOptions(noHide = T,
+                                                      direction = 'center',
+                                                      textOnly = T,
+                                                      style = list(
+                                                        "font-family" = "Arial",
+                                                        "text-shadow"="2px 2px 5px #FFFFFF,-2px 2px 5px #FFFFFF,2px -2px 5px #FFFFFF,-2px -2px 5px #FFFFFF"
+
+
+                                                      ))) %>%
+      addLabelOnlyMarkers(data=htr_dist_labels,
+                          label = htr_dist_labels_select,
+                          group="English",
+                          labelOptions = labelOptions(noHide = T,
+                                                      direction = 'center',
+                                                      textOnly = T,
+                                                      style = list(
+                                                        "font-family" = "Arial"
+
+
+                                                      ))) %>%
+      addLabelOnlyMarkers(data=htr_dist_labels,
+                          label = htr_dist_labels_select_dari,
+                          group= "Dari",
+                          labelOptions = labelOptions(noHide = T,
+                                                      direction = 'center',
+                                                      textOnly = T,
+                                                      style = list(
+                                                        "font-family" = "Arial"
+
+
+                                                      ))) %>%
+      addCircleMarkers(data=prov_centre,
+                       color = "#58585A",
+                       group="English",
+                       radius=6,
+                       weight=0.1,
+                       opacity = 1.0,
+                       fillOpacity=1,
+                       label = prov_cent_tooltip,
+                       labelOptions = labelOptions(
+                         style = list("font-weight" = "normal",
+                                      "padding" = "3px 8px",
+                                      "font-family" = "Arial",
+                                      "border-color" = "#D1D3D4"
+                         ),
+                         direction = "right",
+                         opacity=0.9),
+                       # highlightOptions = highlightOptions(fillColor="#F5A6A6",
+                       #                                     weight = 1.4,
+                       #                                     bringToFront = F),
+                       options = list(zIndex = 450)) %>%
+      addCircleMarkers(data=prov_centre,
+                       color = "#58585A",
+                       group="Dari",
+                       radius=6,
+                       weight=0.1,
+                       opacity = 1.0,
+                       fillOpacity=1,
+                       label = prov_cent_tooltip,
+                       labelOptions = labelOptions(
+                         style = list("font-weight" = "normal",
+                                      "padding" = "3px 8px",
+                                      "font-family" = "Arial",
+                                      "border-color" = "#D1D3D4"
+                         ),
+                         direction = "right",
+                         opacity=0.9),
+                       # highlightOptions = highlightOptions(fillColor="#F5A6A6",
+                       #                                     weight = 1.4,
+                       #                                     bringToFront = F),
+                       options = list(zIndex = 450)) %>%
+      addCircleMarkers(data=dist_centre,
+                       color = "#8F3535",
+                       radius=4,
+                       weight=0.1,
+                       opacity = 1.0,
+                       fillOpacity=1,
+                       group="English",
+                       label = dist_cent_tooltip, labelOptions = labelOptions(
+                         style = list("font-weight" = "normal",
+                                      "padding" = "3px 8px",
+                                      "font-family" = "Arial",
+                                      "border-color" = "#D1D3D4"
+                         ),
+                         direction = "right",
+                         opacity=0.9),
+                         # highlightOptions = highlightOptions(fillColor="#F5A6A6",
+                         #                                     weight = 1.4,
+                         #                                     bringToFront = F),
+                         options = list(zIndex = 400)) %>%
+      addCircleMarkers(data=dist_centre,
+                       color = "#8F3535",
+                       radius=4,
+                       weight=0.1,
+                       opacity = 1.0,
+                       fillOpacity=1,
+                       group="Dari",
+                       label = dist_cent_tooltip, labelOptions = labelOptions(
+                         style = list("font-weight" = "normal",
+                                      "padding" = "3px 8px",
+                                      "font-family" = "Arial",
+                                      "border-color" = "#D1D3D4"
+                         ),
+                         direction = "right",
+                         opacity=0.9),
+                       # highlightOptions = highlightOptions(fillColor="#F5A6A6",
+                       #                                     weight = 1.4,
+                       #                                     bringToFront = F),
+                       options = list(zIndex = 400)) %>%
+
+      addCircleMarkers(data=select_villages,
+                       color = "#58585A",
+                       group="English",
+                       radius=1,
+                       weight=0.1,
+                       opacity = 0.3,
+                       fillOpacity=0.3,
+                       # highlightOptions = highlightOptions(fillColor="#F5A6A6",
+                       #                                     weight = 1.4,
+                       #                                     bringToFront = F),
+                       options = list(zIndex = 300)) %>%
+      addCircleMarkers(data=select_villages,
+                       color = "#58585A",
+                       group="Dari",
+                       radius=1,
+                       weight=0.1,
+                       opacity = 0.3,
+                       fillOpacity=0.3,
+                       # highlightOptions = highlightOptions(fillColor="#F5A6A6",
+                       #                                     weight = 1.4,
+                       #                                     bringToFront = F),
+                       options = list(zIndex = 300)) %>%
+      
+      addRasterImage(select_hillshade, colors = hillshade_pal, opacity = 0.8) %>% 
+      
+      addLegend("bottomleft", 
+                colors = "#F9C6C7", 
+                labels ="Hard to Reach district<br>ولسوالی های صعب العبور",
+                data = select_htr_dist,
+                opacity = 1) %>%
+      
+      fitBounds(bbox[1], bbox[2], bbox[3], bbox[4]) %>%
+      
+          addLayersControl(
+            baseGroups = c("English","Dari"),
+            options = layersControlOptions(collapsed = F)
+          )
+
+
+    })
+  
+}
+  
+  runApp(shinyApp(ui, server),launch.browser = TRUE)
+  
+  
