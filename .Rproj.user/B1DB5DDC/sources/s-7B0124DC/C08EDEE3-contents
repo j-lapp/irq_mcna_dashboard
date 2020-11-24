@@ -1,0 +1,48 @@
+select_popgroup <- "Returnees"
+
+# put dropdown input into a variable
+select_ind_num <- "a7"
+
+reach_red_pal <- colorNumeric(
+  palette = colorRampPalette(c("#FFE3E4", reach_red))
+  (length(as.numeric(irq_dist_data[['Returnees_a7']]))),
+  domain  = as.numeric(irq_dist_data[['Returnees_a7']]))
+
+
+dist_map <-leaflet(options=leafletOptions(
+  zoomControl = FALSE, doubleClickZoom = FALSE, zoomSnap = 0.01, zoomDelta = 0.01, 
+  attributionControl = FALSE, dragging = FALSE, scrollWheelZoom = FALSE, 
+  easeLinearity = 0.35, minZoom = 6.4, maxZoom = 6.4)) %>%
+  # add base map layer from carto DB
+  addProviderTiles(providers$CartoDB.PositronNoLabels, 
+                   options = providerTileOptions(opacity = 0.5)) %>%
+  # add districts layer
+  addPolygons(data         = irq_dist_data,
+              color        = reach_grey,
+              fillColor    = ifelse(is.na(as.numeric(irq_dist_data[['Returnees_a7']])), 
+                                    reach_lt_grey, 
+                                    reach_red_pal(as.numeric(irq_dist_data[['Returnees_a7']]))),
+              # label        = dist_tooltip,
+              weight       = 0.1,
+              smoothFactor = 0.5,
+              opacity      = 0.9,
+              fillOpacity  = 0.9,
+              options      = list(zIndex = 400),
+              highlightOptions = highlightOptions(fillColor    = white,
+                                                  color        = white,
+                                                  weight       = 3,
+                                                  opacity      = 0.9,
+                                                  fillOpacity  = 0.5,
+                                                  bringToFront = F),
+              labelOptions = labelOptions(noHide      = F,
+                                          opacity     = 0.9,
+                                          direction   = 'left',
+                                          offset      = c(-10,0),
+                                          textOnly    = F,
+                                          style       = list(
+                                            "padding" = "3px 8px",
+                                            "font-family" = "Arial"
+                                          )))
+
+
+sprintf('irq_dist_data[["%s_%s"]]', select_popgroup,  select_ind_num)
