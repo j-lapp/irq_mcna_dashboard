@@ -477,7 +477,7 @@
         indicator_info <- mcna_lookup %>%
           filter(indicator_desc == select_indicator & sector == select_sector_input)
 
-        HTML(sprintf("<img class='icon' src='%s.svg' '><span style='color: %s; font-size: 30px; line-height: 1.6;'><strong>    %s</strong></span><br><span style=' font-size: 20px; color: %s'><strong> %s</span><hr>%s</strong><br>%s",
+        HTML(sprintf("<img class='icon' src='%s.svg' style='color: %s;'><span style='color: %s; font-size: 30px; line-height: 1.6;'><strong>    %s</strong></span><br><span style=' font-size: 20px; color: %s'><strong> %s</span><hr>%s</strong><br>%s",
               indicator_info$icon,
               reach_red, 
               reach_red, 

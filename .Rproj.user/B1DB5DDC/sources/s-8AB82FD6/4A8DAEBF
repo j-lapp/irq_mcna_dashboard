@@ -7,13 +7,13 @@
     "folds" : "",
     "hash" : "0",
     "id" : "4A8DAEBF",
-    "lastKnownWriteTime" : 1606616598,
-    "last_content_update" : 1606616598488,
+    "lastKnownWriteTime" : 1606616934,
+    "last_content_update" : 1606616934984,
     "path" : "C:/Users/jarod/Desktop/R/irq_mcna_dashboard/app.R",
     "project_path" : "app.R",
     "properties" : {
-        "cursorPosition" : "188,0",
-        "scrollLine" : "167"
+        "cursorPosition" : "114,40",
+        "scrollLine" : "102"
     },
     "relative_order" : 3,
     "source_on_save" : false,
