@@ -1,0 +1,29 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1606598162442.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "3D13655F",
+    "lastKnownWriteTime" : 27303502243889249,
+    "last_content_update" : 1606598162442,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "87B8E57D",
+        "caption" : "sector_df",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=sector_df&cache_key=87B8E57D",
+        "displayedObservations" : "17",
+        "environment" : "",
+        "object" : "sector_df",
+        "preview" : "0",
+        "totalObservations" : "17",
+        "variables" : "3"
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

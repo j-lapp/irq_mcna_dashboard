@@ -5,6 +5,6 @@ account: j-lapp
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 3257407
-bundleId: 3901668
+bundleId: 3917251
 url: https://j-lapp.shinyapps.io/irq_mcna_dashboard/
-when: 1606254559.46182
+when: 1606603639.26487
